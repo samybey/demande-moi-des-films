@@ -56,18 +56,58 @@ class Recommendation:
 
     # Display the recommendation for a user
     def make_recommendation(self, user):
-        movie = choice(list(self.movies.values())).title
 
+        sim = compute_all_similarities(user)
+        User bestUser
+        float max = -1000
+#get user most similar
+        for f in range (sim.len):
+            if (f[1]>max):
+                max = f[1]
+                bestUser = f[0]
+        
+
+        movies = bestUser.good_ratings
+        movie = []
+        for m in movies:
+            movie.append(movies[m].title)
+            
+        print("je suis la")
+        
+        #renvoyer les recommandations
+        #movie = choice(list(self.movies.values())).title
+        
+        
+        
         return "Vos recommandations : " + ", ".join([movie])
 
     # Compute the similarity between two users
     @staticmethod
     def get_similarity(user_a, user_b):
-        return 1
+        float res = 0.0
+        
+        for movie in user_a.good_ratings:
+            if movie in user_b.good_ratings:
+                res += 1
+            elif movie in user_b.bad_ratings:
+                res -= 1
+                
+
+        for movie2 in user_a.bad_ratings:
+            if movie in user_b.good_ratings:
+                res -=1
+            elif movie in user_b.bad_ratings:
+                res += 1
+
+        res = res/get_user_norm(user_a)
+        return res
 
     # Compute the similarity between a user and all the users in the data set
     def compute_all_similarities(self, user):
-        return []
+        float list_similarite = [[]]
+        for u in test_users:
+            list_similarite.append([u,get_similarity(user,u)])
+        return list_similarite
 
     @staticmethod
     def get_best_movies_from_users(users):
@@ -79,7 +119,8 @@ class Recommendation:
 
     @staticmethod
     def get_user_norm(user):
-        return 1
+        int nbfilmsnotes = user.good_ratings.len + user.bad_ratings.len
+        return nbfilmsnotes
 
     # Return a vector with the normalised ratings of a user
     @staticmethod

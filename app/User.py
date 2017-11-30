@@ -7,7 +7,7 @@ class User:
         self.id = sender_id
         # Variables used to follow at what step is the user
         self.latest_movie_asked = None
-        self.questions_before_recommendation = 5
+        self.questions_before_recommendation = 2
         # Variables used for the first algorithm
         self.good_ratings = []
         self.bad_ratings = []
@@ -36,7 +36,7 @@ class User:
         self.latest_movie_asked = movie
 
     def reset_remaining_questions_number(self):
-        self.questions_before_recommendation = 5
+        self.questions_before_recommendation = 2
         self.latest_movie_asked = None
 
     def process_message(self, message):
