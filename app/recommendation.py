@@ -5,7 +5,7 @@
 from random import choice
 
 from app.User import User
-
+import numpy as np
 
 class Recommendation:
 
@@ -35,6 +35,13 @@ class Recommendation:
         # Launch the process of ratings
         self.process_ratings_to_users()
 
+        self.genre_movies = [[]]
+        for i in self.movies.values():
+            self.genre_movies.append(i.list_genres)
+            print(i.list_genres)
+                              
+                            
+
     # To process ratings, users associated to ratings are created and every rating is then stored in its user
     def process_ratings_to_users(self):
         for rating in self.ratings:
@@ -57,35 +64,53 @@ class Recommendation:
     # Display the recommendation for a user
     def make_recommendation(self, user):
 
-        sim = compute_all_similarities(user)
-        User bestUser
-        float max = -1000
-#get user most similar
-        for f in range (sim.len):
-            if (f[1]>max):
-                max = f[1]
-                bestUser = f[0]
-        
+        sim = self.compute_all_similarities(user)
+        print(sim)
+        listBestUser = []
+        bestUser = User(100)
+        max = -1000.0
+        indicebest = -1000
+        #get user most similar
+        sim.pop(0)
+        for i in range(0,5):
+            for f in sim:
+                if (f[1]>max):
+                    max = f[1]
+                    indicebest = sim.index(f)
+                    bestUser = f[0]
+                    listBestUser.append(bestUser)
+            sim.pop(indicebest)
 
-        movies = bestUser.good_ratings
+        moviestotal = []
+        moviescommun = []
+        for i in listBestUser:
+            for m in i.good_ratings:
+                moviestotal.append(m)
+        
         movie = []
-        for m in movies:
-            movie.append(movies[m].title)
-            
-        print("je suis la")
-        
-        #renvoyer les recommandations
-        #movie = choice(list(self.movies.values())).title
-        
-        
-        
-        return "Vos recommandations : " + ", ".join([movie])
+
+        for i in moviestotal:
+            movietemp = moviestotal[0]
+            moviestotal.pop(0)
+            if (movietemp in moviestotal):
+                if (movietemp not in moviescommun):
+                    moviescommun.append(movietemp)
+                        
+        for m in moviescommun:
+            movie.append(m.title)
+
+        recommend = "Vos recommandations :"
+        for i in range(0, len(movie)):
+            recommend = recommend + " " + recommend.join([movie[i]])
+
+        print(recommend)
+        return recommend
+
 
     # Compute the similarity between two users
-    @staticmethod
-    def get_similarity(user_a, user_b):
-        float res = 0.0
-        
+    #@staticmethod
+    def get_similarity(self, user_a, user_b):
+        res = 0.0
         for movie in user_a.good_ratings:
             if movie in user_b.good_ratings:
                 res += 1
@@ -94,19 +119,21 @@ class Recommendation:
                 
 
         for movie2 in user_a.bad_ratings:
-            if movie in user_b.good_ratings:
+            if movie2 in user_b.good_ratings:
                 res -=1
-            elif movie in user_b.bad_ratings:
+            elif movie2 in user_b.bad_ratings:
                 res += 1
 
-        res = res/get_user_norm(user_a)
+       # print(self.get_user_norm(user_a))
+        res = res/(self.get_user_norm(user_a))
         return res
 
     # Compute the similarity between a user and all the users in the data set
     def compute_all_similarities(self, user):
-        float list_similarite = [[]]
-        for u in test_users:
-            list_similarite.append([u,get_similarity(user,u)])
+        list_similarite = [[]]
+        for u in self.test_users.values():
+            print(u)
+            list_similarite.append([u,self.get_similarity(user,u)])
         return list_similarite
 
     @staticmethod
@@ -119,7 +146,7 @@ class Recommendation:
 
     @staticmethod
     def get_user_norm(user):
-        int nbfilmsnotes = user.good_ratings.len + user.bad_ratings.len
+        nbfilmsnotes = len(user.good_ratings) + len(user.bad_ratings)
         return nbfilmsnotes
 
     # Return a vector with the normalised ratings of a user
